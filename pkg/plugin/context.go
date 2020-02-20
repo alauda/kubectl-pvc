@@ -6,6 +6,7 @@ import (
 	"github.com/teris-io/shortid"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
+	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
@@ -63,6 +64,10 @@ func (p *CaptainContext) GetChartRepo(name, namespace string) (*v1alpha1.ChartRe
 
 func (p *CaptainContext) UpdateChartRepo(repo *v1alpha1.ChartRepo) (*v1alpha1.ChartRepo, error) {
 	return p.cli.AppV1alpha1().ChartRepos(p.namespace).Update(repo)
+}
+
+func (p *CaptainContext) PatchChartRepo(name string, data []byte) (result *v1alpha1.ChartRepo, err error) {
+	return p.cli.AppV1alpha1().ChartRepos(p.namespace).Patch(name, types.MergePatchType, data)
 }
 
 func (p *CaptainContext) GetHelmRequest(name string) (*v1alpha1.HelmRequest, error) {

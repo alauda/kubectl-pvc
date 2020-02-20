@@ -86,9 +86,9 @@ func (opts *ResyncRepoOption) Run(args []string) (err error) {
 		return err
 	}
 
-	repo.Status.Phase = "Pending"
+	data := `{"status":{"phase":"Pending"}}`
 
-	_, err = pctx.UpdateChartRepo(repo)
+	_, err = pctx.PatchChartRepo(repo.Name, []byte(data))
 	if err != nil {
 		klog.Error("Update chartrepo error: ", err)
 		return err
