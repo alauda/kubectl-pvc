@@ -114,6 +114,9 @@ func (opts *RollbackOption) Run(args []string) (err error) {
 		if err != nil {
 			return false, err
 		}
+		if result.Status.Phase == "Failed" {
+			return false, errors.New("helmrequest failed, please check it's event to find out why")
+		}
 		return result.Status.Phase == "Synced", nil
 	}
 
