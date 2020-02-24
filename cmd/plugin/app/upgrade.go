@@ -113,8 +113,11 @@ func (opts *UpgradeOption) Run(args []string) (err error) {
 		hr.Annotations = make(map[string]string)
 	}
 	hr.Annotations["last-spec"] = string(old)
+	hr.Annotations["kubectl-captain.resync"] = time.Now().String()
 
-	hr.Spec.Version = opts.version
+	if opts.version != "" {
+		hr.Spec.Version = opts.version
+	}
 
 	if opts.repo != "" {
 		splits := strings.Split(hr.Spec.Chart, "/")
