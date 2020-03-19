@@ -4,6 +4,8 @@ go 1.12
 
 replace k8s.io/client-go => k8s.io/client-go v0.0.0-20190620085101-78d2af792bab
 
+replace github.com/alauda/helm-crds => github.com/alauda/helm-crds v0.0.0-20200311033314-5e41368b07e2
+
 require (
 	github.com/alauda/helm-crds v0.0.0-20190904040405-5d13ef317cd8
 	github.com/ghodss/yaml v1.0.0

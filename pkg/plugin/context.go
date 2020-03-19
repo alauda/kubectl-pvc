@@ -2,6 +2,7 @@ package plugin
 
 import (
 	"github.com/alauda/helm-crds/pkg/apis/app/v1alpha1"
+	"github.com/alauda/helm-crds/pkg/apis/app/v1beta1"
 	clientset "github.com/alauda/helm-crds/pkg/client/clientset/versioned"
 	"github.com/teris-io/shortid"
 	"k8s.io/api/core/v1"
@@ -58,16 +59,16 @@ func (p *CaptainContext) Complete(namespace string) (err error) {
 	return nil
 }
 
-func (p *CaptainContext) GetChartRepo(name, namespace string) (*v1alpha1.ChartRepo, error) {
-	return p.cli.AppV1alpha1().ChartRepos(namespace).Get(name, metav1.GetOptions{})
+func (p *CaptainContext) GetChartRepo(name, namespace string) (*v1beta1.ChartRepo, error) {
+	return p.cli.AppV1beta1().ChartRepos(namespace).Get(name, metav1.GetOptions{})
 }
 
-func (p *CaptainContext) UpdateChartRepo(repo *v1alpha1.ChartRepo) (*v1alpha1.ChartRepo, error) {
-	return p.cli.AppV1alpha1().ChartRepos(p.namespace).Update(repo)
+func (p *CaptainContext) UpdateChartRepo(repo *v1beta1.ChartRepo) (*v1beta1.ChartRepo, error) {
+	return p.cli.AppV1beta1().ChartRepos(p.namespace).Update(repo)
 }
 
-func (p *CaptainContext) PatchChartRepo(name string, data []byte) (result *v1alpha1.ChartRepo, err error) {
-	return p.cli.AppV1alpha1().ChartRepos(p.namespace).Patch(name, types.MergePatchType, data)
+func (p *CaptainContext) PatchChartRepo(name string, data []byte) (result *v1beta1.ChartRepo, err error) {
+	return p.cli.AppV1beta1().ChartRepos(p.namespace).Patch(name, types.MergePatchType, data)
 }
 
 func (p *CaptainContext) GetHelmRequest(name string) (*v1alpha1.HelmRequest, error) {
