@@ -9,6 +9,7 @@ This is kubectl plugin for [captain](https://github.com/alauda/captain), current
 * `kubectl captain rollback`: rollback a helmrequest
 * `kubectl captain import`: import a helmrelease to captain
 * `kubectl captain create-repo`: create a chartrepo
+* `kubectl captain resync-repo`: resnyc a chartrepo to update charts
 
 
 ## Install
