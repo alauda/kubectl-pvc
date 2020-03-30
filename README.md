@@ -17,7 +17,7 @@ This is kubectl plugin for [captain](https://github.com/alauda/captain), current
 Download the latest build from the [releases](https://github.com/alauda/kubectl-captain/releases) page, decompress it and run
 
 ```bash
-mv kubectl-captain /usr/local/bin
+mv kubectl-captain-<arch> /usr/local/bin/kubectl-captain
 chmod +x /usr/local/bin/kubectl-captain
 ```
 

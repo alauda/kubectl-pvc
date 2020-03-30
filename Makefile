@@ -3,8 +3,13 @@
 all: fmt vet build install-local
 
 build:
-	CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build -o _output/kubectl-captain ./cmd/plugin
-	cd _output && tar -zcvf kubectl-captain.tar.gz kubectl-captain
+	CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build -o _output/kubectl-captain-amd64 ./cmd/plugin
+	cd _output && tar -zcvf kubectl-captain-amd64.tar.gz kubectl-captain-amd64
+
+build-arm:
+	CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=arm64 go build -o _output/kubectl-captain-arm64 ./cmd/plugin
+	cd _output && tar -zcvf kubectl-captain-arm64.tar.gz kubectl-captain-arm64
+
 
 clean:
 	go clean -r -x
