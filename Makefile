@@ -22,7 +22,7 @@ mod:
 
 install-local:
 	CGO_ENABLED=0 GO111MODULE=on  go build  -o _output/kubectl-captain ./cmd/plugin
-	cp _output/kubectl-captain /usr/local/bin
+	sudo cp _output/kubectl-captain /usr/local/bin
 
 test:
 	bash test.sh
