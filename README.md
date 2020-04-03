@@ -1,5 +1,6 @@
 # kubectl-captain
 
+![Go](https://github.com/alauda/kubectl-captain/workflows/Go/badge.svg)
 
 This is kubectl plugin for [captain](https://github.com/alauda/captain), currently it support the following commands:
 

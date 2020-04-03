@@ -1,9 +1,11 @@
 package plugin
 
 import (
+	"fmt"
 	"github.com/alauda/helm-crds/pkg/apis/app/v1alpha1"
 	"github.com/alauda/helm-crds/pkg/apis/app/v1beta1"
 	clientset "github.com/alauda/helm-crds/pkg/client/clientset/versioned"
+	"github.com/pkg/errors"
 	"github.com/teris-io/shortid"
 	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -69,6 +71,23 @@ func (p *CaptainContext) UpdateChartRepo(repo *v1beta1.ChartRepo) (*v1beta1.Char
 
 func (p *CaptainContext) PatchChartRepo(name string, data []byte) (result *v1beta1.ChartRepo, err error) {
 	return p.cli.AppV1beta1().ChartRepos(p.namespace).Patch(name, types.MergePatchType, data)
+}
+
+// there should be only one deployed release for each helmrequest
+func (p *CaptainContext) GetDeployedRelease(name, namespace string) (*v1alpha1.Release, error){
+	opts := metav1.ListOptions{
+		LabelSelector: fmt.Sprintf("name=%s,status=deployed", name),
+	}
+	result ,err := p.cli.AppV1alpha1().Releases(namespace).List(opts)
+	if err != nil {
+		return nil, err
+	}
+
+	if len(result.Items) < 1 {
+		return nil, errors.New("cannot find deployed release")
+	}
+
+	return &result.Items[0], nil
 }
 
 func (p *CaptainContext) GetHelmRequest(name string) (*v1alpha1.HelmRequest, error) {
