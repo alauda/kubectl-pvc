@@ -43,8 +43,6 @@ func (opts *TriggerUpdateOption) Validate(args []string) error {
 
 }
 
-
-
 // TODO: once we all upgraded captain to v1.0.0, we can just add some annotations
 // to trigger update
 func (opts *TriggerUpdateOption) Run(args []string) error {

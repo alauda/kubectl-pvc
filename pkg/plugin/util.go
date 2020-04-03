@@ -37,7 +37,6 @@ var b64 = base64.StdEncoding
 
 var magicGzip = []byte{0x1f, 0x8b, 0x08}
 
-
 func encodeData(data interface{}) (string, error) {
 	b, err := json.Marshal(data)
 	if err != nil {
@@ -57,7 +56,6 @@ func encodeData(data interface{}) (string, error) {
 
 	return b64.EncodeToString(buf.Bytes()), nil
 }
-
 
 // decodeRelease decodes the bytes in data into a release
 // type. Data must contain a base64 encoded string of a

@@ -1,6 +1,7 @@
 # kubectl-captain
 
 ![Go](https://github.com/alauda/kubectl-captain/workflows/Go/badge.svg)
+[![Go Report Card](https://goreportcard.com/badge/github.com/alauda/kubectl-captain)](https://goreportcard.com/report/github.com/alauda/kubectl-captain)
 
 This is kubectl plugin for [captain](https://github.com/alauda/captain), currently it support the following commands:
 
@@ -11,6 +12,7 @@ This is kubectl plugin for [captain](https://github.com/alauda/captain), current
 * `kubectl captain import`: import a helmrelease to captain
 * `kubectl captain create-repo`: create a chartrepo
 * `kubectl captain resync-repo`: resnyc a chartrepo to update charts
+* `kubectl captain get-manifest`: get manifest of a helmrequest
 
 
 ## Install
@@ -36,7 +38,7 @@ This command upgrade a HelmRequest named `jenkins` in `default` namespace, set t
 
 This command rollback a HelmRequest to it's previous settings.
 
-3. kubectl captain import 
+3. kubectl captain import
 
 `kubectl captain import wordpress -n default --repo=stable --repo-namespace=captain`
 

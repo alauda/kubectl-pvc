@@ -74,11 +74,11 @@ func (p *CaptainContext) PatchChartRepo(name string, data []byte) (result *v1bet
 }
 
 // there should be only one deployed release for each helmrequest
-func (p *CaptainContext) GetDeployedRelease(name, namespace string) (*v1alpha1.Release, error){
+func (p *CaptainContext) GetDeployedRelease(name, namespace string) (*v1alpha1.Release, error) {
 	opts := metav1.ListOptions{
 		LabelSelector: fmt.Sprintf("name=%s,status=deployed", name),
 	}
-	result ,err := p.cli.AppV1alpha1().Releases(namespace).List(opts)
+	result, err := p.cli.AppV1alpha1().Releases(namespace).List(opts)
 	if err != nil {
 		return nil, err
 	}
