@@ -137,7 +137,14 @@ func (opts *CreateOption) Run(args []string) (err error) {
 			klog.Info("Create helmrequest: ", hr.GetName())
 		}
 		return err
+	} else {
+		if err != nil {
+			return err
+		}
 	}
+
+
+
 
 	klog.Info("Start wait for helmrequest to be synced")
 

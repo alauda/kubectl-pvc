@@ -29,6 +29,7 @@ func NewCaptainCommand(streams genericclioptions.IOStreams) *cobra.Command {
 	cmd.PersistentFlags().StringVarP(&ns, "namespace", "n", "default", "the working namespace")
 	cmd.AddCommand(NewCreateRepoCommand())
 	cmd.AddCommand(NewCreateCommand())
+	cmd.AddCommand(NewGetManifestCommand())
 	cmd.AddCommand(NewUpgradeCommand())
 	cmd.AddCommand(NewRollbackCommand())
 	cmd.AddCommand(NewImportCommand())
