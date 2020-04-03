@@ -143,9 +143,6 @@ func (opts *CreateOption) Run(args []string) (err error) {
 		}
 	}
 
-
-
-
 	klog.Info("Start wait for helmrequest to be synced")
 
 	f := func() (done bool, err error) {

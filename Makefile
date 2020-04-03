@@ -1,6 +1,6 @@
 .PHONY: all clean
 
-all: fmt vet build install-local
+all: fmt vet build build-arm install-local
 
 build:
 	CGO_ENABLED=0 GO111MODULE=on GOOS=linux GOARCH=amd64 go build -o _output/kubectl-captain-amd64 ./cmd/plugin
