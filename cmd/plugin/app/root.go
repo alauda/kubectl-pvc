@@ -33,7 +33,6 @@ func NewCaptainCommand(streams genericclioptions.IOStreams) *cobra.Command {
 	cmd.AddCommand(NewUpgradeCommand())
 	cmd.AddCommand(NewRollbackCommand())
 	cmd.AddCommand(NewImportCommand())
-	cmd.AddCommand(NewTriggerUpdateCommand())
 	cmd.AddCommand(NewVersionCommand())
 	cmd.AddCommand(NewResyncRepoCommand())
 
