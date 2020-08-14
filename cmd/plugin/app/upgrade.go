@@ -174,7 +174,13 @@ func (opts *UpgradeOption) Run(args []string) (err error) {
 		}
 
 		if result.Status.Phase == "Failed" && errCount > 75 {
-			return false, errors.New("helmrequest failed, please check it's event to find out why")
+			msg, err := pctx.GetEventsMessage(hr)
+			if err != nil {
+				klog.Error("get events for hr error:", err.Error())
+			} else {
+				klog.Info("helmrequest failed, events are: ", msg)
+			}
+			return false, errors.New("helmrequest failed")
 		}
 
 		if result.Status.Phase == "Failed" {

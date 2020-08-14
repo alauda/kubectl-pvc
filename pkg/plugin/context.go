@@ -5,6 +5,7 @@ import (
 	"github.com/alauda/helm-crds/pkg/apis/app/v1alpha1"
 	"github.com/alauda/helm-crds/pkg/apis/app/v1beta1"
 	clientset "github.com/alauda/helm-crds/pkg/client/clientset/versioned"
+	"github.com/alauda/helm-crds/pkg/client/clientset/versioned/scheme"
 	"github.com/pkg/errors"
 	"github.com/teris-io/shortid"
 	"k8s.io/api/core/v1"
@@ -120,6 +121,21 @@ func (p *CaptainContext) GetRestConfig() *rest.Config {
 
 func (p *CaptainContext) GetConfigMap(name string) (*v1.ConfigMap, error) {
 	return p.core.CoreV1().ConfigMaps(p.namespace).Get(name, metav1.GetOptions{})
+}
+
+func (p *CaptainContext) GetEventsMessage(hr *v1alpha1.HelmRequest) (string, error) {
+	events, err := p.core.CoreV1().Events(hr.Namespace).Search(scheme.Scheme, hr)
+	if err != nil {
+		return "", err
+	}
+
+	msg := ""
+	for _, event := range events.Items {
+		msg += event.Message + ","
+	}
+
+	return msg, err
+
 }
 
 // CreateEvent a event for upgrade/rollback...
