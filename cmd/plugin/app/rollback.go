@@ -4,12 +4,13 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"github.com/alauda/helm-crds/pkg/apis/app/v1alpha1"
+	"time"
+
+	appv1 "github.com/alauda/helm-crds/pkg/apis/app/v1"
 	"github.com/alauda/kubectl-captain/pkg/plugin"
 	"github.com/spf13/cobra"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog"
-	"time"
 )
 
 var (
@@ -94,7 +95,7 @@ func (opts *RollbackOption) Run(args []string) (err error) {
 
 	data := hr.Annotations[key]
 
-	var new v1alpha1.HelmRequestSpec
+	var new appv1.HelmRequestSpec
 	if err = json.Unmarshal([]byte(data), &new); err != nil {
 		return err
 	}

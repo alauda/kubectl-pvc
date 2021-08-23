@@ -28,9 +28,9 @@ import (
 
 	"k8s.io/klog"
 
-	"github.com/alauda/helm-crds/pkg/apis/app/v1alpha1"
-	"helm.sh/helm/pkg/chart"
-	rspb "helm.sh/helm/pkg/release"
+	appv1 "github.com/alauda/helm-crds/pkg/apis/app/v1"
+	"helm.sh/helm/v3/pkg/chart"
+	rspb "helm.sh/helm/v3/pkg/release"
 )
 
 var b64 = base64.StdEncoding
@@ -61,7 +61,7 @@ func encodeData(data interface{}) (string, error) {
 // type. Data must contain a base64 encoded string of a
 // valid protobuf encoding of a release, otherwise
 // an error is returned.
-func DecodeRelease(rel *v1alpha1.Release) (*rspb.Release, error) {
+func DecodeRelease(rel *appv1.Release) (*rspb.Release, error) {
 	var rls rspb.Release
 	rls.Info = rel.Status.ToReleaseInfo()
 

@@ -3,16 +3,17 @@ package app
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/alauda/helm-crds/pkg/apis/app/v1alpha1"
-	"github.com/pkg/errors"
-	"github.com/spf13/cobra"
-	"helm.sh/helm/pkg/chartutil"
-	"helm.sh/helm/pkg/strvals"
-	"k8s.io/api/core/v1"
-	"k8s.io/apimachinery/pkg/util/wait"
-	"k8s.io/klog"
 	"strings"
 	"time"
+
+	appv1 "github.com/alauda/helm-crds/pkg/apis/app/v1"
+	"github.com/pkg/errors"
+	"github.com/spf13/cobra"
+	"helm.sh/helm/v3/pkg/chartutil"
+	"helm.sh/helm/v3/pkg/strvals"
+	v1 "k8s.io/api/core/v1"
+	"k8s.io/apimachinery/pkg/util/wait"
+	"k8s.io/klog"
 
 	"github.com/alauda/kubectl-captain/pkg/plugin"
 )
@@ -133,7 +134,7 @@ func (opts *UpgradeOption) Run(args []string) (err error) {
 
 		optional := false
 
-		hr.Spec.ValuesFrom = []v1alpha1.ValuesFromSource{
+		hr.Spec.ValuesFrom = []appv1.ValuesFromSource{
 			{
 				ConfigMapKeyRef: &v1.ConfigMapKeySelector{
 					LocalObjectReference: v1.LocalObjectReference{Name: opts.cm},
