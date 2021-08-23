@@ -2,6 +2,7 @@ package app
 
 import (
 	"fmt"
+	"strings"
 	"time"
 
 	appv1 "github.com/alauda/helm-crds/pkg/apis/app/v1"
@@ -9,7 +10,7 @@ import (
 	"github.com/pkg/errors"
 	"github.com/spf13/cobra"
 	"helm.sh/helm/v3/pkg/chartutil"
-	"helm.sh/helm/v3/pkg/strvals"
+	"helm.sh/helm/v3/pkg/cli/values"
 	v1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/klog"
@@ -18,19 +19,25 @@ import (
 var (
 	createExample = `
 	# create helmrequest in default ns to set it's chart version to 1.5.0 and set value 'a=b'
-	kubectl captain create foo --chart=stable/nginx-ingress -v 1.5.0 --set=a=b
+	kubectl captain create foo --chart=stable/nginx-ingress -v 1.5.0 --set=a=b -f=values.yaml
 `
 )
 
 type CreateOption struct {
-	chart   string
-	version string
-	values  []string
+	chart      string
+	version    string
+	values     []string
+	valueFiles []string
 
 	wait    bool
 	timeout int
 
 	cm string
+
+	// source appv1.ChartSource
+	sourceType      string
+	sourceAddress   string
+	sourceSecretRef string
 
 	pctx *plugin.CaptainContext
 }
@@ -68,6 +75,10 @@ func NewCreateCommand() *cobra.Command {
 	cmd.Flags().IntVarP(&opts.timeout, "timeout", "t", 0, "timeout for the wait")
 	cmd.Flags().StringVarP(&opts.chart, "chart", "c", "", "chart name, format: <repo>/<chart>")
 	cmd.Flags().StringVarP(&opts.cm, "configmap", "", "", "configmap to obtain values from, it must contains a key called 'values.yaml'")
+	cmd.Flags().StringVar(&opts.sourceType, "source-type", "", "chart source type, can be CHART / HTTP / OCI, default is CHART")
+	cmd.Flags().StringArrayVarP(&opts.valueFiles, "values", "f", []string{}, "specify values in a YAML file or a URL (can specify multiple)")
+	cmd.Flags().StringVar(&opts.sourceAddress, "source-address", "", "chart address. either the URL of the http(s) endpoint or repo of the oci artifact")
+	cmd.Flags().StringVar(&opts.sourceSecretRef, "source-secret-ref", "", "secret name. the secret should contain accessKeyId (username) base64 encoded, and secretKey (password) also base64 encoded")
 	return cmd
 }
 
@@ -122,15 +133,36 @@ func (opts *CreateOption) Run(args []string) (err error) {
 		}
 	}
 
-	// merge values....oh,we have to import helm now....
-	base := hr.Spec.Values.AsMap()
-	for _, value := range opts.values {
-		if err := strvals.ParseInto(value, base); err != nil {
-			return errors.Wrap(err, "failed parsing --set data")
-		}
+	// merge values
+	valueOpts := &values.Options{
+		Values:     opts.values,
+		ValueFiles: opts.valueFiles,
+	}
+	vals, err := valueOpts.MergeValues(nil)
+	if err != nil {
+		return errors.Wrap(err, "failed parsing values")
 	}
 
-	hr.Spec.Values = chartutil.Values(base)
+	hr.Spec.Values = chartutil.Values(vals)
+	hr.Spec.Namespace = hr.Namespace
+
+	switch strings.ToLower(opts.sourceType) {
+	case "oci":
+		hr.Spec.Source = &appv1.ChartSource{
+			OCI: &appv1.ChartSourceOCI{
+				Repo:      opts.sourceAddress,
+				SecretRef: opts.sourceSecretRef,
+			},
+		}
+	case "http":
+		hr.Spec.Source = &appv1.ChartSource{
+			HTTP: &appv1.ChartSourceHTTP{
+				URL:       opts.sourceAddress,
+				SecretRef: opts.sourceSecretRef,
+			},
+		}
+	default:
+	}
 
 	_, err = pctx.CreateHelmRequest(&hr)
 	if !opts.wait {

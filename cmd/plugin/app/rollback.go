@@ -109,15 +109,37 @@ func (opts *RollbackOption) Run(args []string) (err error) {
 
 	klog.Info("Start wait for helmrequest to be synced")
 
+	// For some unknown reasons, the desired chart version may not be synced at this time. So this step
+	// may fail for not found the target chart version. We don't want to report this error directly, as Captain
+	// will retry in the background and it will succeed mostly. So we add this errCount to act as some mechanism.
+	// This should consider a temporary solution.
+	errCount := 0
+	retryLimit := opts.timeout
+	if retryLimit <= 0 {
+		retryLimit = 75
+	}
+
 	// TEST: should we update status too
 	f := func() (done bool, err error) {
 		result, err := pctx.GetHelmRequest(hr.GetName())
 		if err != nil {
 			return false, err
 		}
-		if result.Status.Phase == "Failed" {
+		if result.Status.Phase == "Failed" && errCount >= retryLimit-1 {
+			msg, err := pctx.GetEventsMessage(hr)
+			if err != nil {
+				klog.Error("get events for hr error:", err.Error())
+			} else {
+				klog.Info("helmrequest failed, events are: ", msg)
+			}
 			return false, errors.New("helmrequest failed, please check it's event to find out why")
 		}
+
+		if result.Status.Phase == "Failed" {
+			errCount += 1
+			return false, nil
+		}
+
 		return result.Status.Phase == "Synced", nil
 	}
 
