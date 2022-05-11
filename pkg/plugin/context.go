@@ -1,22 +1,25 @@
 package plugin
 
 import (
+	"context"
 	"fmt"
+	"strings"
+	"time"
+
+	appv1 "github.com/alauda/helm-crds/pkg/apis/app/v1"
 	"github.com/alauda/helm-crds/pkg/apis/app/v1alpha1"
 	"github.com/alauda/helm-crds/pkg/apis/app/v1beta1"
 	clientset "github.com/alauda/helm-crds/pkg/client/clientset/versioned"
 	"github.com/alauda/helm-crds/pkg/client/clientset/versioned/scheme"
 	"github.com/pkg/errors"
 	"github.com/teris-io/shortid"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/types"
 	"k8s.io/cli-runtime/pkg/genericclioptions"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
 	"k8s.io/klog"
-	"strings"
-	"time"
 )
 
 // CaptainContext holds context for captain command
@@ -75,11 +78,11 @@ func (p *CaptainContext) PatchChartRepo(name string, data []byte) (result *v1bet
 }
 
 // there should be only one deployed release for each helmrequest
-func (p *CaptainContext) GetDeployedRelease(name, namespace string) (*v1alpha1.Release, error) {
+func (p *CaptainContext) GetDeployedRelease(name, namespace string) (*appv1.Release, error) {
 	opts := metav1.ListOptions{
 		LabelSelector: fmt.Sprintf("name=%s,status=deployed", name),
 	}
-	result, err := p.cli.AppV1alpha1().Releases(namespace).List(opts)
+	result, err := p.cli.AppV1().Releases(namespace).List(opts)
 	if err != nil {
 		return nil, err
 	}
@@ -91,20 +94,20 @@ func (p *CaptainContext) GetDeployedRelease(name, namespace string) (*v1alpha1.R
 	return &result.Items[0], nil
 }
 
-func (p *CaptainContext) GetHelmRequest(name string) (*v1alpha1.HelmRequest, error) {
-	return p.cli.AppV1alpha1().HelmRequests(p.namespace).Get(name, metav1.GetOptions{})
+func (p *CaptainContext) GetHelmRequest(name string) (*appv1.HelmRequest, error) {
+	return p.cli.AppV1().HelmRequests(p.namespace).Get(name, metav1.GetOptions{})
 }
 
-func (p *CaptainContext) CreateHelmRequest(new *v1alpha1.HelmRequest) (*v1alpha1.HelmRequest, error) {
-	return p.cli.AppV1alpha1().HelmRequests(new.GetNamespace()).Create(new)
+func (p *CaptainContext) CreateHelmRequest(new *appv1.HelmRequest) (*appv1.HelmRequest, error) {
+	return p.cli.AppV1().HelmRequests(new.GetNamespace()).Create(new)
 }
 
-func (p *CaptainContext) UpdateHelmRequest(new *v1alpha1.HelmRequest) (*v1alpha1.HelmRequest, error) {
-	return p.cli.AppV1alpha1().HelmRequests(p.namespace).Update(new)
+func (p *CaptainContext) UpdateHelmRequest(new *appv1.HelmRequest) (*appv1.HelmRequest, error) {
+	return p.cli.AppV1().HelmRequests(p.namespace).Update(new)
 }
 
-func (p *CaptainContext) UpdateHelmRequestStatus(new *v1alpha1.HelmRequest) (*v1alpha1.HelmRequest, error) {
-	return p.cli.AppV1alpha1().HelmRequests(p.namespace).UpdateStatus(new)
+func (p *CaptainContext) UpdateHelmRequestStatus(new *appv1.HelmRequest) (*appv1.HelmRequest, error) {
+	return p.cli.AppV1().HelmRequests(p.namespace).UpdateStatus(new)
 }
 
 func (p *CaptainContext) CreateChartRepo(new *v1alpha1.ChartRepo) (*v1alpha1.ChartRepo, error) {
@@ -120,10 +123,10 @@ func (p *CaptainContext) GetRestConfig() *rest.Config {
 }
 
 func (p *CaptainContext) GetConfigMap(name string) (*v1.ConfigMap, error) {
-	return p.core.CoreV1().ConfigMaps(p.namespace).Get(name, metav1.GetOptions{})
+	return p.core.CoreV1().ConfigMaps(p.namespace).Get(context.TODO(), name, metav1.GetOptions{})
 }
 
-func (p *CaptainContext) GetEventsMessage(hr *v1alpha1.HelmRequest) (string, error) {
+func (p *CaptainContext) GetEventsMessage(hr *appv1.HelmRequest) (string, error) {
 	events, err := p.core.CoreV1().Events(hr.Namespace).Search(scheme.Scheme, hr)
 	if err != nil {
 		return "", err
@@ -139,7 +142,7 @@ func (p *CaptainContext) GetEventsMessage(hr *v1alpha1.HelmRequest) (string, err
 }
 
 // CreateEvent a event for upgrade/rollback...
-func (p *CaptainContext) CreateEvent(et string, reason, message string, hr *v1alpha1.HelmRequest) {
+func (p *CaptainContext) CreateEvent(et string, reason, message string, hr *appv1.HelmRequest) {
 
 	uid, _ := shortid.Generate()
 
@@ -165,7 +168,7 @@ func (p *CaptainContext) CreateEvent(et string, reason, message string, hr *v1al
 		LastTimestamp:  metav1.NewTime(time.Now()),
 		FirstTimestamp: metav1.NewTime(time.Now()),
 	}
-	_, err := p.core.CoreV1().Events(hr.Namespace).Create(&event)
+	_, err := p.core.CoreV1().Events(hr.Namespace).Create(context.TODO(), &event, metav1.CreateOptions{})
 	if err != nil {
 		klog.Errorf("create event for helmrequest %s error: %s", hr.Name, err.Error())
 	}

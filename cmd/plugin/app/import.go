@@ -1,25 +1,28 @@
 package app
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"fmt"
+	"io/ioutil"
+	"os/exec"
+	"os/user"
+	"strings"
+	"time"
+
+	appv1 "github.com/alauda/helm-crds/pkg/apis/app/v1"
 	"github.com/alauda/helm-crds/pkg/apis/app/v1alpha1"
 	"github.com/alauda/kubectl-captain/pkg/plugin"
 	"github.com/ghodss/yaml"
 	"github.com/spf13/cobra"
-	"helm.sh/helm/pkg/chartutil"
-	"io/ioutil"
-	"k8s.io/api/core/v1"
+	"helm.sh/helm/v3/pkg/chartutil"
+	v1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/kubernetes"
 	"k8s.io/klog"
-	"os/exec"
-	"os/user"
-	"strings"
-	"time"
 )
 
 var (
@@ -163,16 +166,16 @@ func (opts *ImportOptions) Run(args []string) (err error) {
 
 	}
 
-	hr := v1alpha1.HelmRequest{
+	hr := appv1.HelmRequest{
 		TypeMeta: metav1.TypeMeta{
 			Kind:       "HelmRequest",
-			APIVersion: "app.alauda.io/v1alpha1",
+			APIVersion: "app.alauda.io/v1",
 		},
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      name,
 			Namespace: opts.pctx.GetNamespace(),
 		},
-		Spec: v1alpha1.HelmRequestSpec{
+		Spec: appv1.HelmRequestSpec{
 			ClusterName:          "",
 			InstallToAllClusters: false,
 			Dependencies:         nil,
@@ -181,7 +184,7 @@ func (opts *ImportOptions) Run(args []string) (err error) {
 			Version:              version,
 			Namespace:            opts.pctx.GetNamespace(),
 			ValuesFrom:           nil,
-			HelmValues:           v1alpha1.HelmValues{Values: values},
+			HelmValues:           appv1.HelmValues{Values: values},
 		},
 	}
 
@@ -314,7 +317,7 @@ func (opts *ImportOptions) createRepoSecret(username, password, name string) err
 	secret.Data["username"] = []byte(username)
 	secret.Data["password"] = []byte(password)
 
-	_, err = cli.CoreV1().Secrets(opts.repoNamespace).Create(&secret)
+	_, err = cli.CoreV1().Secrets(opts.repoNamespace).Create(context.TODO(), &secret, metav1.CreateOptions{})
 	return err
 
 }
